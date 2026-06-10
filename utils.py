@@ -122,3 +122,42 @@ def plot_network(G, positions, title, ax):
     ax.set_xlim(-5, 105)
     ax.set_ylim(-5, 105)
     ax.grid(True, alpha=0.3)
+
+
+# Connectivity experiment for choosing n
+
+def estimate_connectivity_probability(
+    n_values,
+    comm_radius,
+    area_length=100,
+    n_trials=500,
+    base_seed=0
+):
+    results = []
+
+    for n in n_values:
+        connected_count = 0
+        avg_degrees = []
+
+        for trial in range(n_trials):
+            seed = base_seed + 10_000 * n + trial
+            G, _ = random_geometric_network(
+                n=n,
+                area_length=area_length,
+                comm_radius=comm_radius,
+                seed=seed
+            )
+
+            if nx.is_connected(G):
+                connected_count += 1
+
+            avg_degrees.append(2 * G.number_of_edges() / n)
+
+        results.append({
+            "n": n,
+            "connectivity_probability": connected_count / n_trials,
+            "mean_average_degree": np.mean(avg_degrees)
+        })
+
+    return results
+
